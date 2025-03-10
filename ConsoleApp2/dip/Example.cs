@@ -196,36 +196,36 @@ namespace ConsoleApp2.dip
 
         public class SamsungTVAdapter : ITv
         {
-            public SamsungTV Tv { get; set; }
+            public SamsungTV TV { get; set; }
 
             public SamsungTVAdapter(SamsungTV tv)
             {
-                this.Tv = tv;
+                TV = tv;
             }
 
             public void GetInfo()
             {
-                throw new NotImplementedException();
+                TV.GetStatus();
             }
 
             public void IncreaseVolume(int newVolume)
             {
-                throw new NotImplementedException();
+                TV.AdjustVolume(TV.Volume + newVolume);
             }
 
             public void PutChannel(int channel)
             {
-                throw new NotImplementedException();
+                TV.ChangeChannel(channel);
             }
 
             public void TurningOff()
             {
-                throw new NotImplementedException();
+                TV.TurnOff();
             }
 
             public void TurningOn()
             {
-                throw new NotImplementedException();
+                TV.TurnOn();
             }
         }
 
