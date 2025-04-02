@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,31 +8,37 @@ namespace ConsoleApp2.srp
 {
     class Case4
     {
-        class Employee
+        // 1. Класс только для хранения данных сотрудника (SRP)
+        public class Employee
         {
-            public string Name;
-            public double Salary;
+            public string Name { get; set; }
+            public double Salary { get; private set; }
 
-            public void SetSalary(double amount)
+            public void SetSalary(double amount) => Salary = amount;
+        }
+
+        // 2. Класс для вывода информации (SRP)
+        public class EmployeePrinter
+        {
+            public void PrintInfo(Employee employee)
             {
-                Salary = amount;
+                Console.WriteLine($"Employee: {employee.Name}, Salary: ${employee.Salary}");
             }
+        }
 
-            public void PrintInfo()
+        // 3. Класс для работы с файлами (SRP)
+        public class EmployeeRepository
+        {
+            public void SaveToFile(Employee employee, string filePath)
             {
-                Console.WriteLine("Employee: " + Name + " Salary: $" + Salary);
-            }
-
-            public void SaveToFile()
-            {
-                File.WriteAllText("employee.txt", Name + " - " + Salary);
+                File.WriteAllText(filePath, $"{employee.Name} - {employee.Salary}");
                 Console.WriteLine("Employee saved to file!");
             }
 
-            public void LoadFromFile()
+            public void LoadFromFile(string filePath)
             {
-                string data = File.ReadAllText("employee.txt");
-                Console.WriteLine("Loaded: " + data);
+                string data = File.ReadAllText(filePath);
+                Console.WriteLine($"Loaded: {data}");
             }
         }
 
@@ -40,11 +46,15 @@ namespace ConsoleApp2.srp
         {
             static void Main()
             {
-                Employee emp = new Employee();
-                emp.Name = "John";
+                // Создаем объекты с разделенными обязанностями
+                var emp = new Employee { Name = "John" };
                 emp.SetSalary(5000);
-                emp.PrintInfo();
-                emp.SaveToFile();
+
+                var printer = new EmployeePrinter();
+                printer.PrintInfo(emp);
+
+                var repository = new EmployeeRepository();
+                repository.SaveToFile(emp, "employee.txt");
             }
         }
     }
