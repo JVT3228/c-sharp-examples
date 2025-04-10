@@ -1,5 +1,5 @@
 //Здесь класс  Order имел несколько методов, то есть ответственностей, что нарушает принцип SRP "единственной ответственности", так что я разделил эти методы на несколько классов
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace ConsoleApp2.srp
@@ -9,8 +9,8 @@ namespace ConsoleApp2.srp
         public int OrderId;
         public List<string> Items = new List<string>();
 
-        public void AddItem(string item) 
-        { 
+        public void AddItem(string item)
+        {
             Items.Add(item);
         }
     }
@@ -19,7 +19,7 @@ namespace ConsoleApp2.srp
     {
         public void Save(Order order)
         {
-            Console.WriteLine("Order saved to database!");
+            Console.WriteLine("Order #" + order.OrderId + " saved to database!");
         }
     }
 
@@ -27,8 +27,8 @@ namespace ConsoleApp2.srp
     {
         public void Print(Order order)
         {
-            Console.WriteLine("Order #" + OrderId);
-            foreach (var item in Items)
+            Console.WriteLine("Order #" + order.OrderId);
+            foreach (var item in order.Items)
             {
                 Console.WriteLine(" - " + item);
             }
@@ -39,7 +39,7 @@ namespace ConsoleApp2.srp
     {
         public void SendConfirmation(Order order)
         {
-            Console.WriteLine("Order confirmation email sent!");
+            Console.WriteLine("Order confirmation for #" + order.OrderId + " sent!");
         }
     }
 
@@ -47,11 +47,10 @@ namespace ConsoleApp2.srp
     {
         static void Main()
         {
-            // Принцип явных зависимостей из Clean Code
-            var order = new Order();
-            var printer = new OrderPrinter();
-            var repository = new OrderRepository();
-            var emailService = new EmailService();
+            Order order = new Order();
+            OrderPrinter printer = new OrderPrinter();
+            OrderRepository repository = new OrderRepository();
+            EmailService emailService = new EmailService();
 
             order.AddItem("Laptop");
             printer.Print(order);
