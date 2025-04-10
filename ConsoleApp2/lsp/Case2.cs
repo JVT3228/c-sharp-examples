@@ -1,56 +1,93 @@
+//Здесь класс FrozenAccount нарушал принцип LSP, так как его методы Withdraw и Deposit вели себя не так, как ожидалось, что они себя поведут (не выполняли операций вместо выброса исключений), поэтому я сделал BankAccount абстрактным, выделил StandardAccount для нормального поведения и явно запретил операции в FrozenAccount через переопределение CanWithdraw, чтобы подклассы могли полноценно заменять базовый класс без нарушения контракта. + удалил не используемые в коде using ы.
+
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ConsoleApp2.lsp
 {
-    internal class Case2
+    public abstract class BankAccount
     {
-        public class BankAccount
+        public string AccountNumber { get; } = Guid.NewGuid().ToString();
+        public double Balance { get; protected set; }
+
+        public virtual void Deposit(double amount)
         {
-            public string AccountNumber { get; } = Guid.NewGuid().ToString();
-            public double Balance { get; protected set; } // 1. Защищённый сеттер для наследников
-            public bool IsFrozen { get; protected set; } // 2. Состояние заморозки в базовом классе
+            Balance += amount;
+            Console.WriteLine($"Deposited {amount} into account {AccountNumber}");
+        }
 
-            public virtual void Deposit(double amount)
-            {
-                if (IsFrozen)
-                    throw new InvalidOperationException($"Account {AccountNumber} is frozen");
-                
-                Balance += amount;
-                Console.WriteLine($"Deposited {amount} into account {AccountNumber}");
-            }
+        public abstract void Withdraw(double amount);
 
-            public virtual void Withdraw(double amount)
+        public virtual void Transfer(BankAccount targetAccount, double amount)
+        {
+            if (CanWithdraw(amount))
             {
-                if (IsFrozen)
-                    throw new InvalidOperationException($"Account {AccountNumber} is frozen");
-                
-                if (Balance < amount)
-                    throw new InvalidOperationException("Insufficient funds");
-                
-                Balance -= amount;
-                Console.WriteLine($"Withdrew {amount} from account {AccountNumber}");
-            }
-
-            public virtual void Transfer(BankAccount targetAccount, double amount)
-            {
-                if (targetAccount.IsFrozen)
-                    throw new InvalidOperationException($"Target account {targetAccount.AccountNumber} is frozen");
-                
-                Withdraw(amount); // 3. Использует общую логику с проверкой заморозки
+                Withdraw(amount);
                 targetAccount.Deposit(amount);
                 Console.WriteLine($"Transferred {amount} from account {AccountNumber} to {targetAccount.AccountNumber}");
             }
-
-            public virtual void Freeze() => IsFrozen = true;
-            public virtual void Unfreeze() => IsFrozen = false;
-
-            public virtual string GetAccountInfo() => $"Account: {AccountNumber}, Balance: {Balance}, Frozen: {IsFrozen}";
         }
 
-        // 4. FrozenAccount удалён — логика заморозки теперь в базовом классе
+        public virtual string GetAccountInfo()
+        {
+            return $"Account: {AccountNumber} with balance: {Balance}";
+        }
+
+        public virtual void UpdateAccountDetails()
+        {
+            Console.WriteLine($"Updating account details for {AccountNumber}");
+        }
+
+        protected virtual bool CanWithdraw(double amount)
+        {
+            return Balance >= amount;
+        }
+    }
+
+    public class StandardAccount : BankAccount
+    {
+        public override void Withdraw(double amount)
+        {
+            if (CanWithdraw(amount))
+            {
+                Balance -= amount;
+                Console.WriteLine($"Withdrew {amount} from account {AccountNumber}");
+            }
+            else
+            {
+                Console.WriteLine($"Insufficient funds in account {AccountNumber}");
+            }
+        }
+    }
+
+    public class FrozenAccount : BankAccount
+    {
+        public bool IsFrozen { get; private set; } = true;
+
+        public override void Deposit(double amount)
+        {
+            Console.WriteLine($"Cannot deposit to a frozen account {AccountNumber}");
+        }
+
+        public override void Withdraw(double amount)
+        {
+            Console.WriteLine($"Cannot withdraw from a frozen account {AccountNumber}");
+        }
+
+        public void Unfreeze()
+        {
+            IsFrozen = false;
+            Console.WriteLine($"Account {AccountNumber} is now unfrozen");
+        }
+
+        public void Freeze()
+        {
+            IsFrozen = true;
+            Console.WriteLine($"Account {AccountNumber} is frozen again");
+        }
+
+        protected override bool CanWithdraw(double amount)
+        {
+            return false;
+        }
     }
 }
