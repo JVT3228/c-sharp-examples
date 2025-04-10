@@ -1,53 +1,62 @@
+//Здесь класс  Order имел несколько методов, то есть ответственностей, что нарушает принцип SRP "единственной ответственности", так что я разделил эти методы на несколько классов
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ConsoleApp2.srp
 {
-    class Case3
+    class Order
     {
-        class Order
+        public int OrderId;
+        public List<string> Items = new List<string>();
+
+        public void AddItem(string item) 
+        { 
+            Items.Add(item);
+        }
+    }
+
+    class OrderRepository
+    {
+        public void Save(Order order)
         {
-            public int OrderId;
-            public List<string> Items = new List<string>();
+            Console.WriteLine("Order saved to database!");
+        }
+    }
 
-            public void AddItem(string item)
+    class OrderPrinter
+    {
+        public void Print(Order order)
+        {
+            Console.WriteLine("Order #" + OrderId);
+            foreach (var item in Items)
             {
-                Items.Add(item);
-            }
-
-            public void SaveToDatabase()
-            {
-                Console.WriteLine("Order saved to database!");
-            }
-
-            public void PrintOrder()
-            {
-                Console.WriteLine("Order #" + OrderId);
-                foreach (var item in Items)
-                {
-                    Console.WriteLine(" - " + item);
-                }
-            }
-
-            public void SendOrderConfirmation()
-            {
-                Console.WriteLine("Order confirmation email sent!");
+                Console.WriteLine(" - " + item);
             }
         }
+    }
 
-        public class App
+    class EmailService
+    {
+        public void SendConfirmation(Order order)
         {
-            static void Main()
-            {
-                Order order = new Order();
-                order.AddItem("Laptop");
-                order.PrintOrder();
-                order.SaveToDatabase();
-                order.SendOrderConfirmation();
-            }
+            Console.WriteLine("Order confirmation email sent!");
+        }
+    }
+
+    public class App
+    {
+        static void Main()
+        {
+            // Принцип явных зависимостей из Clean Code
+            var order = new Order();
+            var printer = new OrderPrinter();
+            var repository = new OrderRepository();
+            var emailService = new EmailService();
+
+            order.AddItem("Laptop");
+            printer.Print(order);
+            repository.Save(order);
+            emailService.SendConfirmation(order);
         }
     }
 }
